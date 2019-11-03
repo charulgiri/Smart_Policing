@@ -49,6 +49,8 @@ from keras.callbacks import ReduceLROnPlateau, TensorBoard
 from keras.optimizers import RMSprop
 from keras.optimizers import Nadam
 from keras.optimizers import SGD
+from sklearn import preprocessing
+from sklearn.preprocessing import StandardScaler
 
 print(tf.__version__)
 
@@ -56,25 +58,36 @@ print(tf.__version__)
 # In[ ]:
 
 h=246
-datasets=['full_data_movies_kfold.pickle','full_data_peliculas.pickle']
-pickle_file = datasets[0]
-if pickle_file=='full_data_peliculas.pickle':
-    h=201
-else:
+datasets=['full_data_movies_kfold.pickle','full_data_peliculas.pickle', 'full_data.pickle']
+pickle_file = datasets[0]  #choose the dataset to train the model
+
+#--------------------------------make labels for the dataset-----------------------------
+if pickle_file=='full_data_movies_kfold.pickle':
     h=246
+    pickle_file = 'labels_movies_kfold.pickle'         #for movies dataset
+    with open(pickle_file, 'rb') as f:                 #for movies dataset
+    save = pickle.load(f)                              #for movies dataset
+    Y= np.array(save)                                  #for movies dataset
+elif pickle_file=='full_data_peliculas.pickle':   
+    h=201
+    Y=list([1]*100)+list([0]*101)                     #for peliculas dataset
+    Y=np.array(Y)                                     #for peliculas dataset
+
+else:
+   h=1000                                             #for hockey dataset
+   label1 = list([1]*500)
+   label2=list([0]*500)
+   Y=label1+label2
+   Y=np.array(Y)
 
 with open(pickle_file, 'rb') as f:
     save = pickle.load(f)
     X = np.array(save)
 
-pickle_file = 'labels_movies_kfold.pickle'   #for movies dataset
-with open(pickle_file, 'rb') as f:    #for movies dataset
-    save = pickle.load(f)             #for movies dataset
-    Y= np.array(save)                 #for movies dataset
+
 # In[ ]:
 
-#Y=list([1]*100)+list([0]*101)         #for peliculas dataset
-#Y=np.array(Y)                        #for peliculas dataset
+                      
 Y=np_utils.to_categorical(Y)
 import sys
 X.nbytes
@@ -89,8 +102,7 @@ X=np.reshape(X,(h,10,3,60,90))
 x=X                       #for movies dataset
 #x,y=shuffle(X,Y)         #for peliculas dataset
 
-from sklearn import preprocessing
-from sklearn.preprocessing import StandardScaler
+
 
 scaler=StandardScaler()
 for i in range(h):
